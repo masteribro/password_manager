@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:password_manager/home_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -21,7 +22,7 @@ class _LoginPageState extends State<LoginPage> {
         _showBackDialog();
       },
       child: Scaffold(
-        backgroundColor: Colors.black45,
+        backgroundColor: Colors.white,
         body: SafeArea(
           child: SingleChildScrollView(
             child: Form(
@@ -40,7 +41,7 @@ class _LoginPageState extends State<LoginPage> {
                    Text(
                      "P",
                      style: TextStyle(
-                       color: Colors.white,
+                       color: Colors.green,
                        fontWeight: FontWeight.bold,
                        fontSize: 100,
                      ),
@@ -49,10 +50,10 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   Container(
                     alignment: Alignment.center,
-                    child: Text(
+                    child: const Text(
                       "Welcome!",
                       style: TextStyle(
-                          color: Colors.white,
+                          color: Colors.green,
                           fontWeight: FontWeight.bold,
                           fontSize: 22,
                           fontFamily: 'sofiapro-light'),
@@ -63,10 +64,10 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   Container(
                     height: 50,
-                    child: const Text(
+                    child:  Text(
                       "Please enter your account details",
                       style: TextStyle(
-                        color: Colors.white,
+                        color: Colors.green.shade200,
                         fontSize: 15,
                         fontFamily: 'sofiapro',
                       ),
@@ -83,16 +84,16 @@ class _LoginPageState extends State<LoginPage> {
                           // validator: validateLoginPass,
                           keyboardType: TextInputType.text,
                           textAlignVertical: TextAlignVertical.center,
-                          cursorColor: Colors.white,
+                          cursorColor: Colors.black45,
                           // obscureText: !_passwordVisible,
                           style: TextStyle(
-                              color: Colors.white, fontSize: 18),
+                              color: Colors.black45, fontSize: 18),
                           // controller: model.passwordController,
                           decoration: InputDecoration(
                             enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(15),
                                 borderSide: BorderSide(
-                                    width: 1, color: Colors.white)),
+                                    width: 1, color: Colors.black26)),
                             // prefixIcon: Container(
                             //   padding: EdgeInsets.all(15),
                             //   child: SvgPicture.asset(
@@ -114,11 +115,11 @@ class _LoginPageState extends State<LoginPage> {
                             //     });
                             //   },
                             // ),
-                            fillColor: Colors.black45,
+                            fillColor: Colors.black12,
                             filled: true,
                             hintText: "Email",
                             hintStyle:
-                            const TextStyle(color: Colors.white),
+                            const TextStyle(color: Colors.black45),
                           ),
                         ),
                         // TextFormField(
@@ -155,16 +156,16 @@ class _LoginPageState extends State<LoginPage> {
                           // validator: validateLoginPass,
                           keyboardType: TextInputType.text,
                           textAlignVertical: TextAlignVertical.center,
-                          cursorColor: Colors.white,
+                          cursorColor: Colors.black45,
                           // obscureText: !_passwordVisible,
                           style: TextStyle(
-                              color: Colors.white, fontSize: 18),
+                              color: Colors.black45, fontSize: 18),
                           // controller: model.passwordController,
                           decoration: InputDecoration(
                             enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(15),
                                 borderSide: BorderSide(
-                                    width: 1, color: Colors.white)),
+                                    width: 1, color: Colors.black45)),
                             // prefixIcon: Container(
                             //   padding: EdgeInsets.all(15),
                             //   child: SvgPicture.asset(
@@ -178,7 +179,7 @@ class _LoginPageState extends State<LoginPage> {
                                 //     ? Icons.visibility
                                 //     :
                                 Icons.visibility_off,
-                                color: Colors.white,
+                                color: Colors.black45,
                               ),
                               onPressed: () {
                                 setState(() {
@@ -186,7 +187,7 @@ class _LoginPageState extends State<LoginPage> {
                                 });
                               },
                             ),
-                            fillColor: Colors.black45,
+                            fillColor: Colors.black12,
                             filled: true,
                             hintText: "Password",
                             hintStyle:
@@ -205,7 +206,7 @@ class _LoginPageState extends State<LoginPage> {
                             child: Text(
                               "Forgot Password?",
                               style: TextStyle(
-                                color: Colors.white,
+                                color: Colors.black45,
                                 fontSize: 17,
                               ),
                             ),
@@ -217,24 +218,25 @@ class _LoginPageState extends State<LoginPage> {
                         //     :
                         ElevatedButton(
                           onPressed: () {
-                            // if (model.loginFormKey.currentState!
-                            //     .validate()) {
-                            //   setState(() {
-                            //     loading = true;
-                            //   });
-                            //   signIn();
-                            // }
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                  const HomePage()),
+                            );
                           },
-                          child: Text("Login"),
                           style: ElevatedButton.styleFrom(
                               shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(15)),
-                              primary: Colors.white,
+                              primary: Colors.green,
                               padding: EdgeInsets.symmetric(
                                   horizontal: 36, vertical: 2),
                               textStyle: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold)),
+                          child: Text("Login", style: TextStyle(
+                            color: Colors.white,
+                          )),
                         ),
                         SizedBox(height: 10),
                         Row(
@@ -244,7 +246,7 @@ class _LoginPageState extends State<LoginPage> {
                                 child: Text(
                                   "Dont have any account?",
                                   style: TextStyle(
-                                      color: Colors.white, fontSize: 16),
+                                      color: Colors.black45, fontSize: 16),
                                 )),
                             SizedBox(
                               width: 10,
@@ -252,8 +254,10 @@ class _LoginPageState extends State<LoginPage> {
                             Container(
                               child: InkWell(
                                 onTap: () {
+
                                 },
-                                child: (Text(
+                                child: (
+                                    const Text(
                                   "Signup",
                                   style: TextStyle(
                                       color: Colors.green,
@@ -276,38 +280,7 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Future<bool> willPopControl() async {
-    return (await showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        //  title: new Text('Are you sure?'),
-        content: new Text('Do you want to exit the App'),
-        actions: <Widget>[
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(false),
-                child: new Text('No'),
-              ),
-              TextButton(
-                onPressed: () => exitApp(),
-                child: new Text('Yes'),
-              ),
-            ],
-          ),
-        ],
-      ),
-    )) ??
-        false;
-  }
-
-  exitApp() {
-    Future.delayed(const Duration(milliseconds: 1000), () {
-      SystemChannels.platform.invokeMethod('SystemNavigator.pop');
-    });
-  }
-
+  /// This function is used to show a dialog when the user presses the back button on this screen
   void _showBackDialog() {
     showDialog<void>(
       context: context,
@@ -341,5 +314,14 @@ class _LoginPageState extends State<LoginPage> {
       },
     );
   }
+
+/// This function is used to exit the app when the user presses the back button
+  exitApp() {
+    Future.delayed(const Duration(milliseconds: 1000), () {
+      SystemChannels.platform.invokeMethod('SystemNavigator.pop');
+    });
+  }
+
+
 
 }
