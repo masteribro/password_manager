@@ -2,10 +2,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class PasswordTiles extends StatelessWidget {
-  const PasswordTiles({super.key, this.email, this.siteName, this.name});
+  const PasswordTiles({super.key, this.email, this.siteName, this.name, this.onTap});
   final String? email;
   final String? siteName;
   final String? name;
+  final void Function()? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +53,9 @@ class PasswordTiles extends StatelessWidget {
                 ]
               ),
 
-              Icon(Icons.copy)
+              GestureDetector(
+                  onTap: onTap,
+                  child: const Icon(Icons.copy))
             ],
           ),
         )

@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:password_manager/component%20/button.dart';
+import 'package:password_manager/component%20/text_field_widget.dart';
 import 'package:password_manager/home_page.dart';
 
 class LoginPage extends StatefulWidget {
@@ -11,6 +13,9 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+
+  TextEditingController emailController =  TextEditingController();
+  TextEditingController passwordController =  TextEditingController();
   @override
   Widget build(BuildContext context) {
     return PopScope(
@@ -30,7 +35,7 @@ class _LoginPageState extends State<LoginPage> {
               // key: model.loginFormKey,
               child: Padding(
                 padding: EdgeInsets.symmetric(
-                  horizontal: 6,
+                  horizontal: 15,
                 ),
                 child: Column(children: [
                   SizedBox(
@@ -80,130 +85,26 @@ class _LoginPageState extends State<LoginPage> {
                     //  margin: EdgeInsets.only(right: 35, left: 35),
                     child: Column(
                       children: [
-                        TextFormField(
-                          // validator: validateLoginPass,
-                          keyboardType: TextInputType.text,
-                          textAlignVertical: TextAlignVertical.center,
-                          cursorColor: Colors.black45,
-                          // obscureText: !_passwordVisible,
-                          style: TextStyle(
-                              color: Colors.black45, fontSize: 18),
-                          // controller: model.passwordController,
-                          decoration: InputDecoration(
-                            enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(15),
-                                borderSide: BorderSide(
-                                    width: 1, color: Colors.black26)),
-                            // prefixIcon: Container(
-                            //   padding: EdgeInsets.all(15),
-                            //   child: SvgPicture.asset(
-                            //     'assets/images/lock_icon.svg',
-                            //     color: Colors.white,
-                            //   ),
-                            // ),
-                            // suffixIcon: IconButton(
-                            //   icon: Icon(
-                            //     // _passwordVisible
-                            //     //     ? Icons.visibility
-                            //     //     :
-                            //     Icons.visibility_off,
-                            //     color: Colors.white,
-                            //   ),
-                            //   onPressed: () {
-                            //     setState(() {
-                            //       // _passwordVisible = !_passwordVisible;
-                            //     });
-                            //   },
-                            // ),
-                            fillColor: Colors.black12,
-                            filled: true,
-                            hintText: "Email",
-                            hintStyle:
-                            const TextStyle(color: Colors.black45),
-                          ),
-                        ),
-                        // TextFormField(
-                        //   textAlignVertical: TextAlignVertical.center,
-                        //   cursorColor: Colors.white,
-                        //   style: TextStyle(
-                        //       color: Colors.white,
-                        //       fontSize: 18),
-                        //   // controller: model.usernameController,
-                        //   // validator: validateUsername,
-                        //   decoration: InputDecoration(
-                        //       enabledBorder: OutlineInputBorder(
-                        //           borderRadius: BorderRadius.circular(15),
-                        //           borderSide: BorderSide(
-                        //               width: 1, color: Colors.white),
-                        //       ),
-                        //       prefixIcon: Container(
-                        //         padding: EdgeInsets.all(15),
-                        //         // child: SvgPicture.asset(
-                        //         //   'assets/images/profile_icon.svg',
-                        //         //   color: Colors.white,
-                        //         // ),
-                        //       ),
-                        //     fillColor: Colors.black45,
-                        //     filled: true,
-                        //     hintText: "Password",
-                        //     hintStyle:
-                        //     const TextStyle(color: Colors.white),
-                        // )),
+                        TextFieldWidget(
+                            controller: emailController,
+                            textInputType: TextInputType.text,
+                            hintText: "Email"),
                         SizedBox(
                           height: 20,
                         ),
-                        TextFormField(
-                          // validator: validateLoginPass,
-                          keyboardType: TextInputType.text,
-                          textAlignVertical: TextAlignVertical.center,
-                          cursorColor: Colors.black45,
-                          // obscureText: !_passwordVisible,
-                          style: TextStyle(
-                              color: Colors.black45, fontSize: 18),
-                          // controller: model.passwordController,
-                          decoration: InputDecoration(
-                            enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(15),
-                                borderSide: BorderSide(
-                                    width: 1, color: Colors.black45)),
-                            // prefixIcon: Container(
-                            //   padding: EdgeInsets.all(15),
-                            //   child: SvgPicture.asset(
-                            //     'assets/images/lock_icon.svg',
-                            //     color: Colors.white,
-                            //   ),
-                            // ),
-                            suffixIcon: IconButton(
-                              icon: Icon(
-                                // _passwordVisible
-                                //     ? Icons.visibility
-                                //     :
-                                Icons.visibility_off,
-                                color: Colors.black45,
-                              ),
-                              onPressed: () {
-                                setState(() {
-                                  // _passwordVisible = !_passwordVisible;
-                                });
-                              },
-                            ),
-                            fillColor: Colors.black12,
-                            filled: true,
-                            hintText: "Password",
-                            hintStyle:
-                            const TextStyle(color: Colors.white),
-                          ),
-                        ),
+                       TextFieldWidget(
+                           controller: passwordController,
+                           hintText: "Password",
+                           textInputType: TextInputType.text),
                         SizedBox(
                           height: 10,
                         ),
                         InkWell(
                           onTap: () {
-                            // Routers.pushNamed(context, '/reset_password');
                           },
                           child: Container(
                             alignment: Alignment.centerRight,
-                            child: Text(
+                            child: const Text(
                               "Forgot Password?",
                               style: TextStyle(
                                 color: Colors.black45,
@@ -213,31 +114,45 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                         ),
                         SizedBox(height: 5),
-                        // loading
-                        //     ? ProgressBar()
-                        //     :
-                        ElevatedButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                  const HomePage()),
-                            );
-                          },
-                          style: ElevatedButton.styleFrom(
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(15)),
-                              primary: Colors.green,
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: 36, vertical: 2),
-                              textStyle: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold)),
-                          child: Text("Login", style: TextStyle(
-                            color: Colors.white,
-                          )),
-                        ),
+
+
+                       Row(
+                         children: [
+                           Expanded(
+                             flex: 19,
+                             child: SubmitButton(
+                                 isLoading: false,
+                                 label: "Submit",
+                                 labelColor: Colors.white,
+                                 submit: () {
+                                   Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HomePage()));
+                                 },
+                                 color: Colors.green),
+                           ),
+                           const Expanded(
+                               flex: 1,
+                               child: SizedBox(
+                                 width: 5,
+                               )),
+                           Expanded(
+                             flex: 4,
+                             child: GestureDetector(
+                               onTap: () {
+                               },
+                               child: Container(
+                                 height: 62,
+                                 width: 40,
+                                 decoration: BoxDecoration(
+                                   color: Colors.green,
+                                   borderRadius: BorderRadius.circular(15),
+                                 ),
+                                 child: Icon(Icons.fingerprint_outlined,
+                                     color: Colors.white),
+                               ),
+                             ),
+                           )
+                         ],
+                       ),
                         SizedBox(height: 10),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,

@@ -104,11 +104,11 @@ class _TextFieldWidgetState extends State<TextFieldWidget> {
             contentPadding:
             const EdgeInsets.symmetric(vertical: 20.0, horizontal: 20.0),
             labelText: widget.label,
-            labelStyle: TextStyle(color: Colors.black, fontSize: 20),
+            labelStyle: const TextStyle(color: Colors.black, fontSize: 20),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(widget.borderRadius ?? 30.0),
               borderSide: widget.borderSideColor != null
-                  ? BorderSide(color: widget.borderSideColor ?? Colors.green)
+                  ? BorderSide(color: widget.borderSideColor ?? Colors.grey)
                   : const BorderSide(),
             ),
             focusedBorder: OutlineInputBorder(
@@ -126,7 +126,7 @@ class _TextFieldWidgetState extends State<TextFieldWidget> {
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.all(
                   Radius.circular(widget.borderRadius ?? 30.0)),
-              borderSide: const BorderSide(width: 1.5, color: Colors.green),
+              borderSide: const BorderSide(width: 1.5, color: Colors.grey),
             ),
             errorBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.all(
