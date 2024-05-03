@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "853863639428",
+    "firebase_url": "https://passwordmanager-8f464-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "passwordmanager-8f464",
+    "storage_bucket": "passwordmanager-8f464.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:853863639428:android:f2eb7b9e45576a9f9bd5d1",
+        "android_client_info": {
+          "package_name": "com.example.password_manager"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBjFe1_ropg3JXVl7eAtQ3i6H4KYaEED-I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

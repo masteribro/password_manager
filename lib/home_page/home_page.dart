@@ -1,17 +1,20 @@
 import 'dart:convert';
-
-import 'package:flutter/cupertino.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:password_manager/login_screen/login_page.dart';
+import 'package:password_manager/utills/local_storage.dart';
+import 'package:password_manager/utills/secure_storage.dart';
+import '../component /button.dart';
+import '../component /password_tiles.dart';
+import '../component /text_field_widget.dart';
+import '../model/social_media_model.dart';
 
-import 'add_password_bottom_model.dart';
-import 'component /button.dart';
-import 'component /password_tiles.dart';
-import 'component /text_field_widget.dart';
-import 'model/social_media_model.dart';
 
+///biometrics
+String? emailOrNumber;
+String? password;
+bool biometric = false;
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -21,11 +24,15 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   String dropdownValue = "";
+  bool isLoading = false;
+  bool passwordVisible = true;
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
   SocialMediaAccount? selectMedia;
   List<SocialMediaAccount> socialMediaCredentials = [];
+  List<SocialMediaAccount> fetchedMediaCredentials = [];
+  List<SocialMediaAccount> newMediaCredentials = [];
    List<SocialMediaAccount> siteOptions = [
     SocialMediaAccount(
       name: 'Facebook',
@@ -67,6 +74,11 @@ class _HomePageState extends State<HomePage> {
 
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
+  @override
+  void initState()  {
+    fetchData(context);
+    super.initState();
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -152,7 +164,7 @@ class _HomePageState extends State<HomePage> {
                                         color:  Colors.black54,
                                       )),
                                   Text(
-                                        "Mohammed Ibrahim Hassan ",
+                                    "$userEmail",
                                     overflow: TextOverflow.ellipsis,
                                     maxLines: 1,
                                     style: const TextStyle(
@@ -169,34 +181,27 @@ class _HomePageState extends State<HomePage> {
                     ),
                     GestureDetector(
                         onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const LoginPage()),
-                          );
+                          signOut(context);
                         },
-                        child
-                        : Icon(Icons.logout_rounded, color: Colors.green,))
+                        child: const Icon(Icons.logout_rounded, color: Colors.green,))
                   ],
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 10,
                 ),
-                socialMediaCredentials.length > 0 ?
-                Container(
+                fetchedMediaCredentials.isNotEmpty ?
+                SizedBox(
                   height: MediaQuery.of(context).size.height * 0.7,
                   child: ListView.builder(
-                    itemCount:  socialMediaCredentials.length,
+                    itemCount:  fetchedMediaCredentials.length,
                     itemBuilder: (context, index) {
-                      final item = socialMediaCredentials[index];
+                      final item = fetchedMediaCredentials[index];
                       return  Dismissible(
                         key: Key(item.name!),
                         direction: DismissDirection.endToStart,
                         onDismissed: (direction) {
-                          setState(() {
-                            socialMediaCredentials.removeAt(index);
-                          });
 
+                          deletePassword(context, index);
                         },
                         background: Container(
                           alignment: Alignment.centerRight,
@@ -211,36 +216,25 @@ class _HomePageState extends State<HomePage> {
                           child: const Icon(Icons.delete, color: Colors.white),
                         ),
                         child: PasswordTiles(
-                          name:  socialMediaCredentials[index].logoSvgPath,
-                          siteName: socialMediaCredentials[index].name,
-                          email: socialMediaCredentials[index].email,
+                          name:  fetchedMediaCredentials[index].logoSvgPath,
+                          siteName: fetchedMediaCredentials[index].name,
+                          email: fetchedMediaCredentials[index].email,
                           onTap: () {
                             copyToClipboard(context,
-                                socialMediaCredentials[index].email!,
-                                socialMediaCredentials[index].password!,
-                              itemTitle: socialMediaCredentials[index].name!,
+                              fetchedMediaCredentials[index].email!,
+                              fetchedMediaCredentials[index].password!,
+                              itemTitle: fetchedMediaCredentials[index].name!,
                             );
                           },
                         ),
 
                       );
 
-                      //   Container(
-                      //   height: 100,
-                      //   width: MediaQuery.of(context).size.width,
-                      //   margin: EdgeInsets.only(top: 10),
-                      //   decoration: BoxDecoration(
-                      //     color: Colors.grey.shade200,
-                      //     borderRadius: BorderRadius.circular(15),
-                      //     boxShadow: [
-                      //       BoxShadow(
-                      //         color: Colors.grey.withOpacity(0.5),
-                      // )]));
                     },
                   ),
                 ):
-                    Padding(
-                      padding: const EdgeInsets.only(top: 200),
+                    const Padding(
+                      padding: EdgeInsets.only(top: 200),
                       child: Text(
                         "No Passwords Saved",
                         style: TextStyle(
@@ -262,129 +256,134 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+/// This method pops the bottom sheet out
   void showBottomModal(BuildContext context) {
     showModalBottomSheet(
+      isScrollControlled: true,
+      isDismissible: true,
       context: context,
       builder: (BuildContext context) {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter changeState) {
             return Padding(
-              padding: EdgeInsets.only(top: 20, left: 20, right: 20, bottom: 30),
-              child: Container(
-                height: MediaQuery.of(context).size.height * 0.9,
-                width: MediaQuery.of(context).size.width,
-                decoration: const BoxDecoration(
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(10),
-                    topRight: Radius.circular(10),
+              padding: EdgeInsets.only(top: 20, left: 20, right: 20),
+              child: SingleChildScrollView(
+                physics: BouncingScrollPhysics(),
+                child: Container(
+                  decoration: const BoxDecoration(
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(10),
+                      topRight: Radius.circular(10),
+                    ),
                   ),
-                ),
-                child: ListView(
-                  physics: const BouncingScrollPhysics(),
-                  children: [
-                    Form(
-                      key: formKey,
-                      child: Column(
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 30),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              'Save Your Password',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 20,
+                              ),
+                            ),
+                            GestureDetector(
+                              onTap: () => Navigator.pop(context),
+                              child: Icon(Icons.close),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 30),
+                        Form(
+                          key: formKey,
+                          child: Column(
                             children: [
-                              const Text(
-                                'Save Your Password',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 20,
+                              TextFieldWidget(
+                                hintText: 'Enter your email',
+                                controller: emailController,
+                                textInputType: TextInputType.text,
+                                validator: emptyFieldValidator,
+                              ),
+                              const SizedBox(height: 10),
+                              TextFieldWidget(
+                                hintText: 'Enter your password',
+                                controller: passwordController,
+                                textInputType: TextInputType.text,
+                                validator: emptyFieldValidator,
+                              ),
+                              const SizedBox(height: 20),
+                              Container(
+                                height: 60,
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(20),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.08),
+                                      offset: const Offset(0, 4),
+                                      spreadRadius: 0,
+                                      blurRadius: 24,
+                                    ),
+                                  ],
+                                ),
+                                padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                                child: DropdownButton<SocialMediaAccount>(
+                                  hint: Text(
+                                    "${selectMedia?.name ?? 'Select Media'}",
+                                  ),
+                                  isExpanded: true,
+                                  icon: Icon(
+                                    Icons.keyboard_arrow_down_rounded,
+                                  ),
+                                  underline: const SizedBox(),
+                                  value: selectMedia,
+                                  onChanged: (SocialMediaAccount? newValue) {
+                                    pickSelectedMedia(newValue, changeState);
+                                  },
+                                  items: siteOptions.map((SocialMediaAccount value) {
+                                    return DropdownMenuItem<SocialMediaAccount>(
+                                      value: value,
+                                      child: Padding(
+                                        padding: EdgeInsets.only(top: 10),
+                                        child: Row(
+                                          children: [
+                                            Image.asset(
+                                              value.logoSvgPath ?? " ",
+                                              height: 20,
+                                              width: 20,
+                                            ),
+                                            const SizedBox(width: 10),
+                                            Text(
+                                              value.name ?? " ",
+                                              style: TextStyle(color: Colors.black),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    );
+                                  }).toList(),
                                 ),
                               ),
-                              GestureDetector(
-                                onTap: () => Navigator.pop(context),
-                                child: Icon(Icons.close),
+                              const SizedBox(height: 30),
+                              SubmitButton(
+                                isLoading: false,
+                                label: 'Save Password',
+                                submit: () {
+                                  savePassword(context);
+                                },
+                                color: Colors.green,
                               ),
+                               SizedBox(height: MediaQuery.viewInsetsOf(context).bottom),
                             ],
                           ),
-                          const SizedBox(height: 30),
-                          TextFieldWidget(
-                            hintText: 'Enter your email',
-                            controller: emailController,
-                            textInputType: TextInputType.text,
-                            validator: emptyFieldValidator,
-                          ),
-                          const SizedBox(height: 10),
-                          TextFieldWidget(
-                            hintText: 'Enter your password',
-                            controller: passwordController,
-                            textInputType: TextInputType.text,
-                            validator: emptyFieldValidator,
-                          ),
-                          const SizedBox(height: 20),
-                          Container(
-                            height: 60,
-                            // width: MediaQuery.of(context).size.width * 0.9,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(20),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.08),
-                                  offset: const Offset(0, 4),
-                                  spreadRadius: 0,
-                                  blurRadius: 24,
-                                ),
-                              ],
-                            ),
-                            padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                            child: DropdownButton<SocialMediaAccount>(
-                              hint: Text(
-                                "${selectMedia?.name ?? 'Select Media'}",
-                              ),
-                              isExpanded: true,
-                              icon: Icon(
-                                Icons.keyboard_arrow_down_rounded,
-                              ),
-                              underline: const SizedBox(),
-                              value: selectMedia, // selected value from a list of options
-                              onChanged: (SocialMediaAccount? newValue) {
-                                pickSelectedMedia(newValue, changeState);
-                              },
-                              items: siteOptions.map((SocialMediaAccount value) {
-                                return DropdownMenuItem<SocialMediaAccount>(
-                                  value: value,
-                                  child: Padding(
-                                    padding: EdgeInsets.only(top: 10),
-                                    child: Row(
-                                      children: [
-                                        Image.asset(
-                                          value.logoSvgPath ?? " ", // Access the property of the SocialMediaAccount object
-                                          height: 20,
-                                          width: 20,
-                                        ),
-                                        const SizedBox(width: 10),
-                                        Text(
-                                          value.name ?? " ", // Access the property of the SocialMediaAccount object
-                                          style: TextStyle(color: Colors.black),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                );
-                              }).toList(),
-                            ),
-                          ),
-
-                          const SizedBox(height: 30),
-                          SubmitButton(
-                            isLoading: false,
-                            label: 'Save Password',
-                            submit: () {
-                              savePassword();
-                            },
-                            color: Colors.green,
-                          ),
-                          const SizedBox(height: 70),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
               ),
             );
@@ -393,7 +392,6 @@ class _HomePageState extends State<HomePage> {
       },
     );
   }
-
 
   /// This method returns the greeting message based on the current time of the day.
   String getGreeting() {
@@ -409,13 +407,14 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  ///This method is used to pick the selected social media.
   void pickSelectedMedia(newValue, changeState) {
     changeState(() {
       selectMedia = newValue;
     });
   }
 
-/// This is a method to validate the [email] and [password] fields.
+/// This is a method to validate the [email] and [password] text fields.
   String? emptyFieldValidator(String? value) {
     if (value!.isEmpty) {
       return 'Field can not be empty';
@@ -424,34 +423,38 @@ class _HomePageState extends State<HomePage> {
   }
 
   /// This is a method to save the [password], [siteName] and [email].
-  void savePassword() {
+  void savePassword(context) async{
+    /// Validate the fields first before saving
     if (formKey.currentState!.validate()) {
-      debugPrint(passwordController.text);
-      debugPrint(emailController.text);
-      debugPrint(selectMedia?.name);
-      debugPrint(selectMedia?.logoSvgPath,);
+
+      /// To add the data ([password] and [siteName]) to the list
         socialMediaCredentials.add( SocialMediaAccount(
           name: selectMedia?.name,
           logoSvgPath: selectMedia?.logoSvgPath,
           password: passwordController.text,
           email: emailController.text,
         ));
-        /// To rebuild the UI
+        await LocalStorage().save("social_media",json.encode(socialMediaCredentials));
+        socialMediaCredentials.clear();
+        /// To fetch the data that has been newly added to the list
+        fetchData(context);
+      /// To rebuild the UI
       setState(() {});
-
+      /// To clear the text fields after saving
       clearFields();
-
+      /// exit the bottom sheet
       Navigator.pop(context);
     }
   }
 
-  /// This is a method clears the [siteName], [email] and [password] fields.
+  /// This is a method that clears the [siteName], [email] and [password] fields.
   void clearFields() {
     emailController.clear();
     passwordController.clear();
     selectMedia = null;
   }
 
+  /// This is a method to copy the email and password to the clipboard.
   void copyToClipboard(BuildContext context, String email,String password,
       {String? itemTitle}) {
     Clipboard.setData(
@@ -460,5 +463,29 @@ class _HomePageState extends State<HomePage> {
       SnackBar(content: Text(
           '${itemTitle ?? "Item"} credentials copied to clipboard')),
     );
+  }
+
+  ///This method fetch the data from the local storage and set it to the [fetchedMediaCredentials] list.
+  Future<void> fetchData(context) async {
+    final data = await LocalStorage().fetch("social_media");
+    List<dynamic>? jsonData = json.decode(data.toString());
+    fetchedMediaCredentials.addAll(jsonData!.map((json) => SocialMediaAccount.fromJson(json)));
+    setState(() {});}
+
+// Sign out method
+  Future<void> signOut(context) async {
+    await FirebaseAuth.instance.signOut();
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+          builder: (context) => const LoginPage()),
+    );
+  }
+
+  ///Delete saved password
+  Future<void> deletePassword(context, index) async {
+    fetchedMediaCredentials.removeAt(index);
+    LocalStorage().saveMedia("social_media", fetchedMediaCredentials);
+    setState(() {});
   }
 }
